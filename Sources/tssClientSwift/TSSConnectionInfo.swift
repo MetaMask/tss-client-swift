@@ -60,12 +60,17 @@ internal final class TSSConnectionInfo {
     public func removeAll(session: String) {
         queue.sync(flags: .barrier) {
             endpoints.removeAll(where: { $0.session == session })
-            if let i = socketManagers.firstIndex(where: { $0.session == session }) {
-                if let socketManager = socketManagers[i].socketManager {
-                    socketManager.disconnect()
-                }
-                socketManagers.remove(at: i)
+            let sessionSockets = socketManagers.filter { $0.session == session }
+            
+            for tssSocket in sessionSockets {
+                let manager = tssSocket.socketManager
+                manager?.reconnects = false
+                manager?.defaultSocket.removeAllHandlers()
+                manager?.defaultSocket.disconnect()
+                manager?.disconnect()
             }
+            socketManagers.removeAll(where: { $0.session == session})
+            
             if let i = endpoints.firstIndex(where: { $0.session == session }) {
                 endpoints.remove(at: i)
             }
