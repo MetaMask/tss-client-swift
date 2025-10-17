@@ -370,7 +370,7 @@ public class TSSClient {
         let sighex = decoded.toHexString()
         let r = try BigInt(sighex.prefix(64), radix: 16) ?? { throw TSSClientError("R component for signature is not valid") }()
         var s = try BigInt(sighex.suffix(from: sighex.index(sighex.startIndex, offsetBy: 64)), radix: 16) ?? { throw TSSClientError("S component for signature is not valid") }()
-        let v = try decoded_r.bytes.last ?? { throw TSSClientError("V component for signature is not valid") }()
+        let v = try decoded_r.last ?? { throw TSSClientError("V component for signature is not valid") }()
         var recoveryParam = UInt8(v % 2)
 
         if _sLessThanHalf {
